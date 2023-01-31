@@ -5,7 +5,7 @@
 
 library(sf)
 
-buffer
+b
 lat1
 lon1
 lat2
@@ -19,9 +19,9 @@ points2 <- st_as_sf(data.frame(x=lat2, y=lon2), coords=c("x", "y"), crs=EPSG)
 st_crs(points1) <- 3857
 st_crs(points2) <- 3857
 
-# Create a buffer around each point with a radius of 0.5 units
-buf1 <- st_buffer(points1, dist=0.5)
-buf2 <- st_buffer(points2, dist=0.5)
+# Create a buffer around each point with a radius of 'b' units
+buf1 <- st_buffer(points1, dist=b)
+buf2 <- st_buffer(points2, dist=b)
 
 # Perform the spatial join using the buffered points
 result <- st_join(buf1, buf2)
