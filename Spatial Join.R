@@ -22,6 +22,7 @@ table2$table2.id <- 1:nrow(table2)
 points1 <- st_as_sf(data.frame(x=table1$LATITUDE, y=table1$LONGITUDE), coords=c("x", "y"), crs=EPSG)
 points2 <- st_as_sf(data.frame(x=table2$LATITUDE, y=table2$LONGITUDE), coords=c("x", "y"), crs=EPSG)
 
+# Re-project points to meter-friendly CRS
 points1 <- st_transform(points1, prjEPSG) ## Parameterized (for now)
 points2 <- st_transform(points2, prjEPSG)
 
@@ -30,7 +31,6 @@ buf2 <- st_buffer(points2, dist=buffer) ## TODO - Figure out how to use meters
 
 # Perform the spatial join using the buffered points
 result <- st_intersects(points1, buf2,sparse=FALSE)
-
 
 # Prep Output data
 result <- as.data.frame(result)
