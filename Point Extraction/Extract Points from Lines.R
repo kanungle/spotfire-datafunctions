@@ -1,65 +1,88 @@
 # Neil Kanungo
 # TIBCO Software
 # February 2023
-# Extract Points from (Poly)lines
+# Extract Points from Lines
 
-library(sp)
-library(maptools)
+# Load Libraries
 library(rgdal)
-library(wkb)
+library(sf)
 library(geosphere)
 library(dplyr)
 
-Proj4<- CRS("+proj=longlat +datum=WGS84 +no_defs") 
-sl <- readWKB(sl, as.character(seq_along(sl)), proj4string=Proj4)
-beginmeasure <- data.frame(beginmeasure)
-endmeasure <- data.frame(endmeasure)
-id <- data.frame(id)
-newlines <- data.frame()
-sl <- as(sl, "SpatialLines")
-i <- 0
-for (lines in sl@lines) {
-	for (line in lines@Lines) {
-		i <- i+1
-		#extract spatial points from each spatial line
-		coords <- line@coords
-		segments <- data.frame(coords)
-		Longitude <- segments[,1]
-		Latitude <- segments[,2]
-		n <- nrow(segments)
-		
-		#calculate the distance between each spatial point
-		Measure <- distGeo(segments[1:n-1,],segments[2:n,],6378137,1/298.257223563)*100/2.54/12
-		Measure <- data.frame(Measure)
-		
-		#ensure that the beginning and ending measure match with input data
-		Measure <- Measure["Measure"] * ((endmeasure[i,] - beginmeasure[i,])/sum(Measure["Measure"]))
-		
-		#add beginning measure to calculated measures to line up the spatial points
-		Measure <- cumsum(Measure["Measure"]) + beginmeasure[i,]
-		
-		#add the beginning measure to match the number of points
-		Measure <- rbind(beginmeasure[i,],Measure["Measure"])
-		segments <- data.frame(Longitude,Latitude,Measure)
-		
-		#add the interval distance as new rows
-		intervals <- data.frame(Measure=seq(floor(beginmeasure[i,]),ceiling(endmeasure[i,]),by=dist.interval))
-		segments <- full_join(segments,intervals,by="Measure")
-		
-		#add the RiverID
-		segments <- data.frame(segments,RiverID=id[i,])
-		
-		#interpolate missing lat/longs
-		missingRows <- which(is.na(segments$Longitude))
-		Lon <- approx(segments$Measure,segments$Longitude,xout=segments$Measure[missingRows])
-		Lon <- as.data.frame(Lon)
-		segments$Longitude[missingRows]<-Lon[,2]
-		Lat <- approx(segments$Measure,segments$Latitude,xout=segments$Measure[missingRows])
-		Lat <- as.data.frame(Lat)
-		segments$Latitude[missingRows]<-Lat[,2]
-				
-		#append new rows
-		segments <- arrange(segments,Measure)
-		newlines <- rbind(newlines,segments)
-	}
+# Hide warnings
+options(warn=-1)
+
+# Create initial dataframe
+myLines = as.data.frame(identifier)
+
+# Create row.id
+myLines$row.id = 1:nrow(myLines)
+
+# read the WKB data of te currentLine
+wkb_lines = readWKB(geometry)
+
+# convert the WKB data to simple features
+lines_sf = st_as_sf(wkb_lines)
+
+# extract the coordinates of the lines
+lines_df = as.data.frame(st_coordinates(lines_sf))
+
+# Drop geometry from memory
+myLines = subset(myLines,select=c(row.id,identifier))
+
+# Join Line ID to Coordinates
+lines_df = left_join(lines_df,myLines, by=c("L1"="row.id"))
+
+# Create Output Dataframe
+output = data.frame(Longitude=as.numeric(),
+                       Latitude=as.numeric(),
+                       Identifier=as.character(),
+                       Measure=as.numeric())
+
+for (line in unique(lines_df$L1)) {
+  # Select points of a single line
+  currentLine = lines_df[lines_df$L1 == line,]
+  
+  # Calculate distances between those points
+  for (point in 1:(nrow(currentLine)-1)){
+    distance[point] = distHaversine(cbind(currentLine$X[point:(point+1)],currentLine$Y[point:(point+1)]))
+  }
+  currentLine$distance[2:(nrow(currentLine))] = distance
+  currentLine$distance[1]=0
+  
+  # Cumulatively sum the distance measures
+  currentLine$distance = cumsum(currentLine$distance)
+  
+  # Find the total line length
+  lineLength = floor(max(currentLine$distance))
+  
+  # Merge in interval lengths
+  newDistances = data.frame(distance=seq(from=0,to=lineLength,by=interval))
+  currentLine = full_join(currentLine,newDistances)
+  currentLine$identifier = currentLine$identifier[1]
+  currentLine$L1 = currentLine$L1[1]
+  currentLine <- arrange(currentLine,distance)
+  currentLine <- unique(currentLine)
+  
+  # Interpolate missing Latitude and Longitudes
+  missingRows <- which(is.na(currentLine$X))
+  Lon <- approx(currentLine$distance,currentLine$X,xout=currentLine$distance[missingRows])
+  Lat <- approx(currentLine$distance,currentLine$Y,xout=currentLine$distance[missingRows])
+  currentLine$X[missingRows]<-Lon$y
+  currentLine$Y[missingRows]<-Lat$y
+  
+  # Drop unneeded columns
+  currentLine = subset(currentLine,select=-L1)
+  
+  # Rename columns
+  colnames(currentLine) = c("Longitude","Latitude","Identifier","Measure")
+  
+  # Merge into output dataframe
+  output = rbind(output,currentLine)
 }
+
+#Debug
+print(output)
+
+# Copyright (c) 2023. TIBCO Software Inc.
+# This file is subject to the license terms contained in the license file that is distributed with this file
