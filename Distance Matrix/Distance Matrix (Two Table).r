@@ -10,12 +10,12 @@ library(tidyr)
 # Input Parameters: table1, table2
 
 # Create tables with ID columns
-table1 <- unique(table1)
-table2 <- unique(table2)
 colnames(table1) <- casefold(colnames(table1),upper=TRUE)
 colnames(table2) <- casefold(colnames(table2),upper=TRUE)
-table1 <- table1[!is.na(table1$LATITUDE) || !is.na(table1$LONGITUDE), ]
-table2 <- table2[!is.na(table2$LATITUDE) || !is.na(table2$LONGITUDE), ]
+table1 <- unique(table1)
+table2 <- unique(table2)
+table1 <- table1[complete.cases(table1[,c("LATITUDE","LONGITUDE")]),]
+table2 <- table2[complete.cases(table2[,c("LATITUDE","LONGITUDE")]),]
 table1$table1.id <- 1:nrow(table1)
 table2$table2.id <- 1:nrow(table2)
 
