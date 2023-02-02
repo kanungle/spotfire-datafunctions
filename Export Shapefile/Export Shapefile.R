@@ -31,7 +31,7 @@ export_layer <- "Spotfire Layer"
 poly.type <- casefold(poly.type,upper=TRUE)
 
 # Convert geometry column to Well-Known Binary
-if (is.na(proj4)) {proj4<-"+proj=longlat +datum=WGS84"}
+if (is.null(proj4)) {proj4 <- "+proj=longlat +datum=WGS84"}
 wkb.data <- readWKB(geometry, proj4string=CRS(proj4))
 
 # Create Spatial Data Frame
