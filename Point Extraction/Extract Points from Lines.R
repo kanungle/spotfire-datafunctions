@@ -7,10 +7,10 @@
 # Output Parameters: output
 
 # Load Libraries
-library(rgdal)
 library(sf)
 library(geosphere)
 library(dplyr)
+library(wkb)
 
 # Hide warnings
 options(warn=-1)
@@ -46,11 +46,14 @@ for (line in unique(lines_df$L1)) {
   # Select points of a single line
   currentLine = lines_df[lines_df$L1 == line,]
   
+  # Create empty dataframe for distance
+  distance = data.frame(distance=as.numeric())
+  
   # Calculate distances between those points
   for (point in 1:(nrow(currentLine)-1)){
-    distance[point] = distHaversine(cbind(currentLine$X[point:(point+1)],currentLine$Y[point:(point+1)]))
+    distance[point,1] = distHaversine(cbind(currentLine$X[point:(point+1)],currentLine$Y[point:(point+1)]))
   }
-  currentLine$distance[2:(nrow(currentLine))] = distance
+  currentLine$distance[2:(nrow(currentLine))] = distance[,1]
   currentLine$distance[1]=0
   
   # Cumulatively sum the distance measures
