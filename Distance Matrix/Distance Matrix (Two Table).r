@@ -1,13 +1,13 @@
 # Neil Kanungo
 # TIBCO Software
 # February 2023
-# Spatial Join Data Function
+# Distance Matrix (Two Table)
 
 library(geosphere)
 library(dplyr)
 library(tidyr)
 
-# Input Parameters: table1, table2, buffer
+# Input Parameters: table1, table2
 
 # Create tables with ID columns
 table1 <- unique(table1)
@@ -36,7 +36,6 @@ result$table2.id <- as.integer(gsub("V","",result$table2.id))
 result <- left_join(result,table2, by=c('table2.id'='table2.id'), keep=FALSE)
 
 # Filter below specified buffer distance, drop unneeded columns/rows
-result <- result[which(result$DISTANCE <= buffer),]
 result <- subset(result,select=-c(table1.id,table2.id))
 
 # Debug output
