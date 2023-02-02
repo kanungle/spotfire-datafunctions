@@ -3,6 +3,9 @@
 # February 2023
 # Extract Points from Lines
 
+# Input Parameters: identifier, geometry, interval
+# Output Parameters: output
+
 # Load Libraries
 library(rgdal)
 library(sf)
