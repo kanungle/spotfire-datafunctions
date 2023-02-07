@@ -16,7 +16,7 @@ def generate_readme(sfd_file, readme_filename):
     df_description = df_root.find('Description').text
     df_language = df_root.find('Language').text
 
-    readme_file.write("# " + df_name + " " + df_language + " Data Function for TIBCO Spotfire&reg;\n\n")
+    readme_file.write("# " + df_name + " Data Function for TIBCO Spotfire&reg;\n\n")
     readme_file.write(df_description + "\n\n")
 
     ## generic installation instrucitons
@@ -55,22 +55,21 @@ def generate_readme(sfd_file, readme_filename):
         
         readme_file.write("|" + output.find('Name').text + "|" + output.find('Type').text + "|" + output.find('DisplayName').text + "|" + output.find('Description').text + "|\n")
 
-    readme_file.write("\n\n&copy; Copyright 2022. TIBCO Software Inc.")
+    readme_file.write("\n\n&copy; Copyright 2023. TIBCO Software Inc.")
 
     readme_file.close();
 
 ## Example usage
 ## set path to your sfd file
 import os
-rootdir = 'C:\\Users\\nkanungo\\Desktop\\DF_Library\\spatial_join_v1.0\\[Geospatial] Spatial Join.sfd'
+rootdir = 'C:\\Users\\nkanungo\\Desktop\\New_DFs\\'
 
-'''
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         fullpath = os.path.join(subdir, file)
-        print(fullpath)
-        print(subdir)
-        sfd = fullpath
-'''
-## Generate the read me and where to write the file to
-generate_readme(sfd, subdir + "\\readme.md")
+        if file.endswith(".sfd"):
+            print(fullpath)
+            print(subdir)
+            sfd = fullpath
+            generate_readme(sfd, subdir + "\\readme.md")
+
