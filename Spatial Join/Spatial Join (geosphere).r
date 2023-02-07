@@ -7,17 +7,23 @@ library(geosphere)
 library(dplyr)
 library(tidyr)
 
-# Input Parameters: table1, table2, buffer
+# Input Parameters: lat1, lon1, lat2, lon2, id1, id2, buffer
+# Output Parameters: result
 
 # Create tables with ID columns
-colnames(table1) <- casefold(colnames(table1),upper=TRUE)
-colnames(table2) <- casefold(colnames(table2),upper=TRUE)
+table1 <- data.frame(Latitude = lat1,
+                     Longitude = lon1,
+                     ID=id1)
+table2 <- data.frame(Latitude=lat2,
+                     Longitude=lon2,
+                     ID=id2)
 table1 <- unique(table1)
 table2 <- unique(table2)
-table1 <- table1[complete.cases(table1[,c("LATITUDE","LONGITUDE")]),]
-table2 <- table2[complete.cases(table2[,c("LATITUDE","LONGITUDE")]),]
+table1 <- table1[complete.cases(table1[,c("Latitude","Longitude")]),]
+table2 <- table2[complete.cases(table2[,c("Latitude","Longitude")]),]
 table1$table1.id <- 1:nrow(table1)
 table2$table2.id <- 1:nrow(table2)
+
 
 # Calculate Distance Matrix
 result <- distm(cbind(table1$LONGITUDE, table1$LATITUDE), cbind(table2$LONGITUDE, table2$LATITUDE), fun = distHaversine)
