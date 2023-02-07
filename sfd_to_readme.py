@@ -60,7 +60,7 @@ def generate_readme(sfd_file, readme_filename):
     readme_file.close();
 
 ## Example usage
-## set path to your sfd file
+## set path to your directory containing your sfd file(s)
 import os
 rootdir = 'C:\\Users\\nkanungo\\Desktop\\New_DFs\\'
 
