@@ -4,7 +4,7 @@
 # Nearest Neighbors (Geo)
 
 # Input Parameters: source_longitude, source_latitude, search_longitude, search_latitude
-# Output Parameters: closest
+# Output Parameters: closest, lines.df
 
 # Load Libraries
 library(geosphere)
@@ -23,6 +23,7 @@ closest_point <- function(point, points) {
   })
   closest_index <- which.min(distances)
   closest_point <- points[closest_index, ]
+  print(closest_point)
   return(closest_point)
 }
 
@@ -51,6 +52,22 @@ for (p in 1:nrow(source_df)) {
   closest[p,3:4] <- closest_point(point, points)
 }
 
-# Result data frame
-closest
+# Create a data frame for plotting Lines
+coords1 <- data.frame(LineID = 1:nrow(closest),
+                      Latitude = closest$source_latitude,
+                      Longitude = closest$source_longitude)
 
+coords1$Type = "Source"
+
+coords2 <- data.frame(LineID = 1:nrow(closest),
+                      Latitude = closest$found_latitude,
+                      Longitude = closest$found_longitude)
+
+coords2$Type = "Found"
+
+lines.df <- rbind(coords1,coords2)
+lines.df <- lines.df[order(lines.df$LineID),]
+
+# Result data frames
+closest
+lines.df
