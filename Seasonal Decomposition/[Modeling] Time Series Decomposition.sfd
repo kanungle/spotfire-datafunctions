@@ -22,11 +22,13 @@ resample_method = resample_method.upper()
 fill_method = fill_method or 'forward'
 fill_method = fill_method.upper()
 
+# Create Time Series Object
 df = pd.DataFrame({'Date': date_column, 'Observed': obs_column})
 df['Date'] = pd.to_datetime(df['Date'])
 df.set_index('Date', inplace=True)
 df = df.asfreq(data_freq)
 
+# Condition Data
 if fill_method == "FORWARD":
     df = df.fillna('ffill')
 elif fill_method == "BACKWARD":
@@ -43,9 +45,10 @@ elif resample_method == 'MIN':
 elif resample_method == 'MAX':
     df = df.resample(resample_freq).max()
     
-
+# Decompose Data
 df_decomposed = seasonal_decompose(df, model = model_type)
 
+# Prep Output
 output_df = pd.DataFrame({'Observed': df_decomposed.observed,'Trend' : df_decomposed.trend, 'Seasonal' : df_decomposed.seasonal, 'Residual' : df_decomposed.resid})
 output_df.reset_index(inplace=True)
 output_df = output_df.rename(columns = {'index':'Datetime'})</Script>
@@ -116,7 +119,7 @@ output_df = output_df.rename(columns = {'index':'Datetime'})</Script>
     <Description>Seasonally Decomposed values in data table format</Description>
   </Output>
   <Description>This data function takes a series of data oriented temporally and seasonally decomposes into trend, seasonal, and residual components. Written in Python. No packages required.</Description>
-  <ApprovalStamp>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAATqYeMAzqDUSy+OcilBEPRgAAAAACAAAAAAADZgAAwAAAABAAAAD8gHS/KjOwxlsBRBRSYjy+AAAAAASAAACgAAAAEAAAAIcg6g5UV6TxEfZQd5qgPIuIAAAArSs5oNABbk+bYIm1ybLcsj9/0f3cT2UkxXWRQ2km9nHdRJovOiBNFutgkWugMWf/m8Rnxl8q24iIrJg00xgpw0xTO/QneWM4eokTDfR53u4mCnHtYkV0qxSD5k7K0UM7JZMuGpQZ8p+GhFn0si4f2CmS7S6zjaeGaOH7rLBetXyGJUsIajhAbhQAAADgOrrBCpQAZUk+maNRsg22BTCSsA==</ApprovalStamp>
+  <ApprovalStamp>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAATqYeMAzqDUSy+OcilBEPRgAAAAACAAAAAAADZgAAwAAAABAAAAA2PowV11byRMJyNHe5WCoUAAAAAASAAACgAAAAEAAAALIKk9Brr9JEPN71T3vYa5yIAAAAoBZ/9F+VUQWw5o3LbF4QgZITLkLckTUqWIvNebQ7bSMhu2nz3Nnsoj/HKgGVYUcFd0qVbATEqUP7ZSP2mxm8HxsgrbEOqzaK01Kzxut3nQNuxkhJEc5ilqTaNMnxRt9PTBGUul5+FxI/McGtNrOcS9Iw+0NKTsILmJPPfXtKAJKoeBaIYhPvUBQAAACfUdvo0yKZV6C+5YJAQpItTqTdgg==</ApprovalStamp>
   <AdditionalApprovalStamps />
   <Category>exploration</Category>
 </ScriptFunctionDefinition>
