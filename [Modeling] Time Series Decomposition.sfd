@@ -1,0 +1,122 @@
+<?xml version="1.0"?>
+<ScriptFunctionDefinition xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Version Major="1" Minor="0" />
+  <Name>[Modeling] Time Series Decomposition</Name>
+  <Script># [Modeling] Time Series Decomposition
+# April 2023
+# Version 1.0
+# askdatascience@tibco.com
+
+import pandas as pd
+import numpy as np
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+# Input Parameters
+obs_column
+date_column
+data_freq
+model_type = model_type or 'additive'
+resample_freq = resample_freq or data_freq
+resample_method = resample_method or 'mean'
+resample_method = resample_method.upper()
+fill_method = fill_method or 'forward'
+fill_method = fill_method.upper()
+
+df = pd.DataFrame({'Date': date_column, 'Observed': obs_column})
+df['Date'] = pd.to_datetime(df['Date'])
+df.set_index('Date', inplace=True)
+df = df.asfreq(data_freq)
+
+if fill_method == "FORWARD":
+    df = df.fillna('ffill')
+elif fill_method == "BACKWARD":
+    df = df.fillna('bfill')
+elif fill_method == 'MEAN':
+    df = df.fillna('mean')
+
+if resample_method == 'MEAN':
+    df = df.resample(resample_freq).mean()
+elif resample_method == 'SUM':
+    df = df.resample(resample_freq).sum()
+elif resample_method == 'MIN':
+    df = df.resample(resample_freq).min()
+elif resample_method == 'MAX':
+    df = df.resample(resample_freq).max()
+    
+
+df_decomposed = seasonal_decompose(df, model = model_type)
+
+output_df = pd.DataFrame({'Observed': df_decomposed.observed,'Trend' : df_decomposed.trend, 'Seasonal' : df_decomposed.seasonal, 'Residual' : df_decomposed.resid})
+output_df.reset_index(inplace=True)
+output_df = output_df.rename(columns = {'index':'Datetime'})</Script>
+  <Language>Python</Language>
+  <Input>
+    <Name>obs_column</Name>
+    <Type>Column</Type>
+    <DisplayName>Observed Values</DisplayName>
+    <Description>Observed time series values you would like to decompose</Description>
+    <AllowedDataType>Integer</AllowedDataType>
+    <AllowedDataType>Double</AllowedDataType>
+    <AllowedDataType>Float</AllowedDataType>
+    <AllowedDataType>Decimal</AllowedDataType>
+    <AllowedDataType>Long</AllowedDataType>
+  </Input>
+  <Input>
+    <Name>date_column</Name>
+    <Type>Column</Type>
+    <DisplayName>Datetime</DisplayName>
+    <Description>The Date, Time, or DateTime column</Description>
+    <AllowedDataType>Date</AllowedDataType>
+    <AllowedDataType>Time</AllowedDataType>
+    <AllowedDataType>DateTime</AllowedDataType>
+  </Input>
+  <Input>
+    <Name>data_freq</Name>
+    <Type>Value</Type>
+    <DisplayName>Date Frequency</DisplayName>
+    <Description>The frequency at which your data is intervaled (H = Hourly, D = Daily, B = Business Day, W = Weekly, M= Monthly, A = Yearly)</Description>
+    <AllowedDataType>String</AllowedDataType>
+  </Input>
+  <Input>
+    <Name>model_type</Name>
+    <Type>Value</Type>
+    <DisplayName>Model Type</DisplayName>
+    <Description>'Additive' or 'Multiplicative'</Description>
+    <IsOptional>true</IsOptional>
+    <AllowedDataType>String</AllowedDataType>
+  </Input>
+  <Input>
+    <Name>resample_freq</Name>
+    <Type>Value</Type>
+    <DisplayName>Resample Frequency</DisplayName>
+    <Description>If you would like to aggregate the data onto a different frequency (H = Hourly, D = Daily, B = Business Day, W = Weekly, M= Monthly, A = Yearly)</Description>
+    <IsOptional>true</IsOptional>
+    <AllowedDataType>String</AllowedDataType>
+  </Input>
+  <Input>
+    <Name>resample_method</Name>
+    <Type>Value</Type>
+    <DisplayName>Resample Aggregation</DisplayName>
+    <Description>The aggregation method for resampling frequency (Mean, Sum, Min, or Max)</Description>
+    <IsOptional>true</IsOptional>
+    <AllowedDataType>String</AllowedDataType>
+  </Input>
+  <Input>
+    <Name>fill_method</Name>
+    <Type>Value</Type>
+    <DisplayName>Null Value Impute Method</DisplayName>
+    <Description>How the null values, if any, should be imputed (Forward, Backward, or Mean)</Description>
+    <IsOptional>true</IsOptional>
+    <AllowedDataType>String</AllowedDataType>
+  </Input>
+  <Output>
+    <Name>output_df</Name>
+    <Type>Table</Type>
+    <DisplayName>Seasonal Decomposition Results</DisplayName>
+    <Description>Seasonally Decomposed values in data table format</Description>
+  </Output>
+  <Description>This data function takes a series of data oriented temporally and seasonally decomposes into trend, seasonal, and residual components. Written in Python. No packages required.</Description>
+  <ApprovalStamp>AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAATqYeMAzqDUSy+OcilBEPRgAAAAACAAAAAAADZgAAwAAAABAAAAD8gHS/KjOwxlsBRBRSYjy+AAAAAASAAACgAAAAEAAAAIcg6g5UV6TxEfZQd5qgPIuIAAAArSs5oNABbk+bYIm1ybLcsj9/0f3cT2UkxXWRQ2km9nHdRJovOiBNFutgkWugMWf/m8Rnxl8q24iIrJg00xgpw0xTO/QneWM4eokTDfR53u4mCnHtYkV0qxSD5k7K0UM7JZMuGpQZ8p+GhFn0si4f2CmS7S6zjaeGaOH7rLBetXyGJUsIajhAbhQAAADgOrrBCpQAZUk+maNRsg22BTCSsA==</ApprovalStamp>
+  <AdditionalApprovalStamps />
+  <Category>exploration</Category>
+</ScriptFunctionDefinition>
